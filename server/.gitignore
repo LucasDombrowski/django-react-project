@@ -1,0 +1,41 @@
+# Python bytecode
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environments
+.env
+env/
+venv/
+.venv/
+ENV/
+
+# Django / Python specific
+*.sqlite3
+*.log
+
+# Collected static files
+staticfiles/
+
+# Media files
+media/
+
+# Poetry / pip
+.poetry/
+dist/
+build/
+*.egg-info/
+
+# Environment variables
+.env
+.env.*
+
+# Coverage reports
+.coverage
+coverage.xml
+htmlcov/
+
+# IDE / Editor specific (if not covered by root)
+.idea/
+.vscode/ 
