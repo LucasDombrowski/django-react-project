@@ -10,11 +10,13 @@ import FieldDef from "./adapters/Field";
 import ServerRenderedFieldDef from "./adapters/ServerRenderedField";
 import TextInputDef from "./adapters/widgets/TextInput";
 import SelectDef from "./adapters/widgets/Select";
+import LoginView from "./views/Login";
 
 const config = new DjangoBridge.Config();
 
 // Add your views here
 config.addView("Home", HomeView);
+config.addView("Login", LoginView);
 
 // Add your context providers here
 config.addContextProvider("csrf_token", CSRFTokenContext);

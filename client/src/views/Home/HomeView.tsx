@@ -1,7 +1,7 @@
 export default function HomeView() {
   return (
-    <>
-      <h1>Welcome to your new Django Bridge app!</h1>
-    </>
+    <div className="bg-red-500">
+      <h1>Ceci est un test</h1>
+    </div>
   );
 }
