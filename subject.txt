@@ -1,0 +1,7 @@
+Pour le projet de fin de module vous devez réaliser sous Django un site de paris.
+— Le type de paris est laissé libre (football, lancé d’avions en papier, etc).
+— Le site devra inclure un système d’authentification.
+— Le site devra proposer une page de règles.
+— Le site devra permettre aux utilisateurs de parier.
+— Le site devra afficher le classement des concurrents.
+— Un système de bots est en bonus.

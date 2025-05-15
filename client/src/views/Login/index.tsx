@@ -2,9 +2,10 @@ import React, { useContext } from 'react';
 import { Form as DjangoBridgeForm } from '@django-bridge/react';
 import { CSRFTokenContext } from '../../contexts';
 import loginStrings from '../../libs/keychains/login.json';
+import StyledDjangoFormRenderer from '../../components/forms/StyledDjangoFormRenderer';
 
 interface DjangoProvidedForm {
-  render: () => string;
+  render: () => React.ReactNode;
 }
 
 interface LoginViewProps {
@@ -26,7 +27,7 @@ const LoginView: React.FC<LoginViewProps> = ({ action_url, form }) => {
         <DjangoBridgeForm className="mt-8 space-y-6" action={action_url} method="post">
           {csrfToken && <input type="hidden" name="csrfmiddlewaretoken" value={csrfToken} />}
           
-          <div dangerouslySetInnerHTML={{ __html: form.render() }} />
+          <StyledDjangoFormRenderer form={form} />
 
           <div>
             <button
