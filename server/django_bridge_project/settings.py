@@ -120,6 +120,10 @@ STATIC_URL = os.environ.get("DJANGO_STATIC_URL", "static/")
 if os.environ.get("VITE_BUNDLE_DIR"):
     STATICFILES_DIRS = [os.environ["VITE_BUNDLE_DIR"]]
 
+# Media files (Uploads)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
