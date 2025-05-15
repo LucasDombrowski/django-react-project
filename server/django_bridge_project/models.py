@@ -82,8 +82,9 @@ class Match(models.Model):
     team_two_score = models.IntegerField(default=0)
 
     #These following scores will be filled only if the match was finished at a draw and it needed a winner
-    team_one_draw_score = models.IntegerField(default=0, help_text="The score of the match if it was a draw and it needed a winner.")
-    team_two_draw_score = models.IntegerField(default=0, help_text="The score of the match if it was a draw and it needed a winner.")
+    is_winner_needed = models.BooleanField(default=False, help_text="If True, the match needs a winner and it can be sometimes decided by a draw score.")
+    team_one_draw_score = models.IntegerField(blank=True, null=True, help_text="The score of the match if it was a draw and it needed a winner.")
+    team_two_draw_score = models.IntegerField(blank=True, null=True, help_text="The score of the match if it was a draw and it needed a winner.")
 
     score_points = models.IntegerField(default=10, help_text="Points awarded if the user's bet on this match is correct.")
     start_datetime = models.DateTimeField()
@@ -104,8 +105,13 @@ class Prediction(models.Model):
     label = models.CharField(max_length=255, help_text="The question or description for this prediction. E.g., 'Final score of Team A?', 'First player to score?', 'Will a penalty be awarded?'")
     prediction_type = models.CharField(
         max_length=20,
-        choices=PredictionType.get_choices(), # Use the get_choices() method
-        default=PredictionType.NUMERICAL.value
+        choices=PredictionType.get_choices(),
+        default=PredictionType.NUMERICAL.value,
+        help_text=(
+            "Numerical: Expects a number (e.g., score, count).<br>"
+            "Player: Expects a selection of a player (stores Player ID).<br>"
+            "Boolean: Expects a Yes/No or True/False choice."
+        )
     )
     score_points = models.IntegerField(default=10, help_text="Points awarded if the user's bet on this prediction is correct.")
     correct_value = models.CharField(max_length=255, blank=True, null=True, help_text="The actual outcome of this prediction, filled after the match is settled.")
