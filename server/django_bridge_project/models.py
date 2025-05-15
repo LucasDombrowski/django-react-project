@@ -1,6 +1,16 @@
 from django.db import models
 from django.conf import settings # Import settings to get AUTH_USER_MODEL
+from django.contrib.auth.models import AbstractUser # Import AbstractUser
 from .enums.prediction_types import PredictionType # Import the enum
+from .validators.image_validators import CustomImageValidator # Added import
+
+class CustomUser(AbstractUser):
+    # Add any additional fields here. For example:
+    # bio = models.TextField(blank=True)
+    score = models.IntegerField(default=0, help_text="The user's current score in the betting game.")
+
+    def __str__(self):
+        return self.username
 
 class Competition(models.Model):
     name = models.CharField(max_length=200, unique=True)
@@ -10,6 +20,11 @@ class Competition(models.Model):
 
     def __str__(self):
         return self.name
+
+    def clean(self):
+        super().clean()
+        if self.logo and hasattr(self.logo, 'file'): # Check if file exists
+            CustomImageValidator.validate(self.logo.file, "Logo")
 
     class Meta:
         ordering = ['start_date', 'name']
@@ -24,6 +39,11 @@ class Team(models.Model):
     def __str__(self):
         return self.name
 
+    def clean(self):
+        super().clean()
+        if self.logo and hasattr(self.logo, 'file'): # Check if file exists
+            CustomImageValidator.validate(self.logo.file, "Logo")
+
     class Meta:
         ordering = ['name']
         verbose_name = "Team"
@@ -34,12 +54,18 @@ class Player(models.Model):
     team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='players')
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
+    nickname = models.CharField(max_length=100, blank=True)
     role = models.CharField(max_length=100, blank=True) # e.g., Forward, Midfielder, Defender, Goalkeeper
     photo = models.ImageField(upload_to='player_photos/', blank=True, null=True)
     birth_date = models.DateField(blank=True, null=True)
 
     def __str__(self):
         return f"{self.first_name} {self.last_name}"
+
+    def clean(self):
+        super().clean()
+        if self.photo and hasattr(self.photo, 'file'): # Check if file exists
+            CustomImageValidator.validate(self.photo.file, "Photo")
 
     class Meta:
         ordering = ['last_name', 'first_name']

@@ -142,3 +142,6 @@ DJANGO_BRIDGE = {
         "csrf_token": "django.middleware.csrf.get_token",
     },
 }
+
+# Custom User Model
+AUTH_USER_MODEL = 'django_bridge_project.CustomUser'
