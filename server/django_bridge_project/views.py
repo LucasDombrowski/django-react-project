@@ -16,3 +16,10 @@ def login_view(request):
         return auth_controller.handle_login_submission(request)
     else: # GET or other methods
         return auth_controller.display_login_form(request)
+
+def registration_view(request):
+    auth_controller = AuthController() # Re-instantiate or use a single instance if appropriate
+    if request.method == 'POST':
+        return auth_controller.handle_registration_submission(request)
+    else: # GET or other methods
+        return auth_controller.display_registration_form(request)

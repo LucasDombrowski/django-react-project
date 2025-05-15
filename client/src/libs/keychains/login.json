@@ -3,5 +3,6 @@
   "username_label": "Username",
   "password_label": "Password",
   "login_button_text": "Sign In",
-  "login_heading": "Welcome Back!"
+  "login_heading": "Welcome Back!",
+  "alt_action_register_text": "Don't have an account? Register"
 } 
