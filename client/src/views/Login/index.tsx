@@ -18,7 +18,6 @@ const LoginView: React.FC<LoginViewProps> = ({ action_url, form }) => {
       form={form}
       csrfToken={csrfToken}
       buttonText={loginStrings.login_button_text}
-      buttonColorClasses="bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500"
       altActionText={loginStrings.alt_action_register_text}
       altActionLink="/register/"
     />

@@ -18,7 +18,6 @@ const RegisterView: React.FC<RegisterViewProps> = ({ action_url, form }) => {
       form={form}
       csrfToken={csrfToken}
       buttonText={registerStrings.register_button_text}
-      buttonColorClasses="bg-green-600 hover:bg-green-700 focus:ring-green-500"
       altActionText={registerStrings.alt_action_login_text}
       altActionLink="/login/"
     />

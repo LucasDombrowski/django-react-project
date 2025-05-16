@@ -1,5 +1,5 @@
 import React from 'react';
-import { Team } from '../../libs/types/models/team'; // Assuming your Team interface is here
+import { Team } from '@/libs/types/models/team'; // Updated path alias
 import clsx from 'clsx'; // Import clsx
 
 interface TeamDisplayProps {
