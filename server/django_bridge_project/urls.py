@@ -27,6 +27,7 @@ urlpatterns = [
     path("", views.home, name="home"),
     path("login/", views.login_view, name="login"),
     path("register/", views.registration_view, name="register"),
+    path("match/<int:match_id>/", views.match_detail_view, name="match_detail"),
 ]
 
 # Serve media files during development

@@ -12,12 +12,14 @@ import TextInputDef from "./adapters/widgets/TextInput";
 import SelectDef from "./adapters/widgets/Select";
 import LoginView from "./views/Login";
 import RegisterView from "./views/Register";
+import MatchDetailView from "./views/MatchDetail";
 const config = new DjangoBridge.Config();
 
 // Add your views here
 config.addView("Home", HomeView);
 config.addView("LoginView", LoginView);
 config.addView("RegisterView", RegisterView);
+config.addView("MatchDetailView", MatchDetailView);
 
 // Add your context providers here
 config.addContextProvider("csrf_token", CSRFTokenContext);

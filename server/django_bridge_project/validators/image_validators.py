@@ -5,7 +5,7 @@ from django.core.exceptions import ValidationError
 class CustomImageValidator:
     MAX_IMAGE_UPLOAD_SIZE_MB = 2
     MAX_IMAGE_UPLOAD_SIZE_BYTES = MAX_IMAGE_UPLOAD_SIZE_MB * 1024 * 1024
-    ALLOWED_IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png']
+    ALLOWED_IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png','.webp']
     MAX_IMAGE_WIDTH = 1024
     MAX_IMAGE_HEIGHT = 1024
 
