@@ -1,6 +1,9 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
+from django import forms
+from django.db.models import Q
 from .models import CustomUser, Competition, Team, Player, Match, Prediction, Bet, Answer
+from .enums.prediction_types import PredictionType
 
 # To customize the CustomUser admin:
 class CustomUserAdmin(UserAdmin):
@@ -28,9 +31,50 @@ class TeamAdmin(admin.ModelAdmin):
     search_fields = ['name']
     inlines = [PlayerInline]
 
+# Custom ModelForm for Prediction inline
+class PredictionAdminForm(forms.ModelForm):
+    class Meta:
+        model = Prediction
+        fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Ensure this logic runs only for existing instances with a prediction_type and match
+        if self.instance and self.instance.pk and self.instance.prediction_type and hasattr(self.instance, 'match') and self.instance.match:
+            prediction_type = self.instance.prediction_type
+            match_instance = self.instance.match
+
+            # Make correct_value not required by default as model field allows blank/null
+            self.fields['correct_value'].required = False
+
+            if prediction_type == PredictionType.NUMERICAL.value:
+                self.fields['correct_value'].widget = forms.NumberInput()
+                self.fields['correct_value'].help_text = "Enter the correct numerical value."
+            elif prediction_type == PredictionType.BOOLEAN.value:
+                self.fields['correct_value'].widget = forms.Select(choices=[
+                    ('', '---------'), 
+                    ('True', 'Yes'), 
+                    ('False', 'No')
+                ])
+                self.fields['correct_value'].help_text = "Select Yes (True) or No (False)."
+            elif prediction_type == PredictionType.PLAYER.value:
+                players = Player.objects.filter(
+                    Q(team=match_instance.team_one) | Q(team=match_instance.team_two)
+                ).distinct().order_by('last_name', 'first_name')
+                
+                player_choices = [('', '---------')]
+                player_choices.extend([(str(p.id), str(p)) for p in players])
+                
+                self.fields['correct_value'].widget = forms.Select(choices=player_choices)
+                self.fields['correct_value'].help_text = "Select the correct player by ID."
+            else:
+                # Default for other types or if something is unexpected
+                self.fields['correct_value'].help_text = "Enter the correct value based on the prediction type."
+
 # Inline for Predictions within Match Admin
 class PredictionInline(admin.StackedInline):
     model = Prediction
+    form = PredictionAdminForm # Assign the custom form
     extra = 1
     # Simplified fieldset, description is now in model field's help_text
     # fields = ('label', 'prediction_type', 'score_points', 'correct_value') # We'll use fieldsets instead

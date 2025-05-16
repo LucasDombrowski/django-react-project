@@ -82,6 +82,11 @@ class MatchController(View):
         except Http404:
             raise
 
+        # Check if the match is already finished
+        if match_instance.is_finished:
+            django_messages.error(request, "This match has already finished. Betting is closed.")
+            return self.render_match_detail_page(request, match_id)
+
         if Bet.objects.filter(user=request.user, match=match_instance).exists():
             django_messages.warning(request, "You have already placed a bet on this match.") # Ensure message is set before re-render
             return self.render_match_detail_page(request, match_id) # Re-render with the message
