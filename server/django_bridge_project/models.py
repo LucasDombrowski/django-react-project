@@ -89,6 +89,7 @@ class Match(models.Model):
     score_points = models.IntegerField(default=10, help_text="Points awarded if the user's bet on this match is correct.")
     start_datetime = models.DateTimeField()
     is_finished = models.BooleanField(default=False)
+    points_calculation_done = models.BooleanField(default=False, help_text="True if points have been calculated and attributed for this finished match.")
 
     def __str__(self):
         return f"{self.team_one.name} vs {self.team_two.name} ({self.competition.name} - {self.start_datetime.strftime('%Y-%m-%d %H:%M')})"
