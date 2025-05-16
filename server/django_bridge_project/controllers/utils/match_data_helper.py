@@ -1,10 +1,22 @@
 from django_bridge_project.models import Match, Bet, Answer, Team, Prediction # Added Bet, Answer, Team, Prediction
 from django.shortcuts import get_object_or_404 # Added for the new method
+from django_bridge_project.services.points_attribution_helper import PointsAttributionHelper # Added import
 
 class MatchDataHelper:
     def __init__(self, request, match_instance: Match):
         self.request = request
         self.match_instance = match_instance
+        # Instantiate PointsAttributionHelper if match is finished for _get_actual_winner_id
+        if self.match_instance.is_finished:
+            self.points_helper = PointsAttributionHelper(self.match_instance)
+        else:
+            self.points_helper = None
+
+    def _get_actual_winner_id(self) -> int | None:
+        """Gets the actual winner ID using PointsAttributionHelper."""
+        if self.points_helper:
+            return self.points_helper._determine_actual_winner_team_id()
+        return None # Should not be called if match not finished / points_helper not init
 
     def _serialize_competition(self, competition):
         if not competition:
@@ -59,6 +71,42 @@ class MatchDataHelper:
             })
         return predictions_data
 
+    def _get_match_leaderboard_data(self):
+        if not self.match_instance.points_calculation_done or not self.points_helper:
+            return None
+
+        leaderboard = []
+        actual_winner_id = self._get_actual_winner_id()
+        if actual_winner_id is None: # Should not happen if points_calculation_done is True
+            return None 
+
+        bets = Bet.objects.filter(match=self.match_instance)\
+                          .select_related('user', 'winner_team')\
+                          .prefetch_related('answers__prediction')
+
+        for bet in bets:
+            user_total_points_for_this_bet = 0
+            predicted_winner_id = bet.winner_team_id if bet.winner_team else 0
+            
+            user_total_points_for_this_bet += PointsAttributionHelper.calculate_points_for_match_winner(
+                predicted_winner_id,
+                actual_winner_id,
+                self.match_instance.score_points
+            )
+
+            for answer in bet.answers.all():
+                user_total_points_for_this_bet += PointsAttributionHelper.calculate_points_for_prediction_answer(
+                    str(answer.value) if answer.value is not None else None,
+                    answer.prediction # This is the Prediction instance
+                )
+            
+            leaderboard.append({
+                "user": {"id": bet.user.id, "username": bet.user.username},
+                "total_gained_points": user_total_points_for_this_bet
+            })
+        
+        return sorted(leaderboard, key=lambda x: x['total_gained_points'], reverse=True)
+
     def get_match_data(self):
         match_data = {
             "id": self.match_instance.id,
@@ -70,11 +118,13 @@ class MatchDataHelper:
             "team_two_score": self.match_instance.team_two_score,
             "start_datetime": self.match_instance.start_datetime.isoformat(),
             "is_finished": self.match_instance.is_finished,
+            "points_calculation_done": self.match_instance.points_calculation_done, # Added this flag
             "is_winner_needed": self.match_instance.is_winner_needed,
             "team_one_draw_score": self.match_instance.team_one_draw_score,
             "team_two_draw_score": self.match_instance.team_two_draw_score,
             "score_points": self.match_instance.score_points,
             "predictions": self._serialize_predictions(),
+            "leaderboard": self._get_match_leaderboard_data() # Added leaderboard data
         }
         return match_data
 

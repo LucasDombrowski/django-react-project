@@ -56,6 +56,7 @@ class MatchController(View):
                 "match": match_data,
                 "bet_form": final_bet_form, 
                 "isAuthenticated": request.user.is_authenticated,
+                "current_user_id": request.user.id if request.user.is_authenticated else None,
                 "csrfToken": get_token(request),
                 "action_url": reverse('match_detail', kwargs={'match_id': match_id}),
                 "messages": messages_for_react,

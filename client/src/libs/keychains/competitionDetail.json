@@ -1,0 +1,12 @@
+{
+  "competition_logo_alt": " logo",
+  "dates_label": "Dates:",
+  "to_separator": "to",
+  "matches_header": "Matches in this Competition",
+  "no_matches_message": "There are currently no matches scheduled for this competition.",
+  "view_match_button": "View Match",
+  "upcoming_matches_header": "Upcoming Matches",
+  "finished_matches_header": "Finished Matches",
+  "no_upcoming_matches_message": "No upcoming matches for this competition at the moment.",
+  "no_finished_matches_message": "No matches have finished yet for this competition."
+} 

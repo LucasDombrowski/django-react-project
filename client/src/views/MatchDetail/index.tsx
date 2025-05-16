@@ -16,6 +16,7 @@ import UserBetDisplay from '@/components/match/UserBetDisplay'; // Import the ne
 // Import newly separated types
 import { DjangoMessage } from '@/libs/types/messages';
 import { UserBetDetailsType } from '@/libs/types/bets';
+import MatchLeaderboard from '@/components/match/MatchLeaderboard'; // Import Leaderboard
 // Note: Competition, Team, Player, Prediction are implicitly used through MatchData
 
 // Local definitions of DjangoMessage, SerializedPredictionAnswer, UserBetDetailsType are removed.
@@ -24,6 +25,7 @@ export interface MatchDetailViewProps {
   match: MatchData;
   bet_form: DjangoProvidedForm | null; // Can be null if user already bet
   isAuthenticated: boolean; // Add isAuthenticated
+  current_user_id?: number | null; // Added current_user_id (optional)
   csrfToken: string; // Add csrfToken
   action_url: string; // Add action_url
   messages?: DjangoMessage[]; // Add messages prop (optional)
@@ -34,10 +36,11 @@ const MatchDetailView: React.FC<MatchDetailViewProps> = ({
   match,
   bet_form,
   isAuthenticated,
+  current_user_id = null,
   csrfToken,
   action_url,
   messages = [],
-  user_bet_details = null // Default to null
+  user_bet_details = null
 }) => {
   const {
     competition,
@@ -46,6 +49,8 @@ const MatchDetailView: React.FC<MatchDetailViewProps> = ({
     team_one_score,
     team_two_score,
     is_finished,
+    points_calculation_done, // Destructure this
+    leaderboard, // Destructure leaderboard
     start_datetime,
   } = match;
 
@@ -126,7 +131,6 @@ const MatchDetailView: React.FC<MatchDetailViewProps> = ({
       {user_bet_details ? (
         <UserBetDisplay 
           details={user_bet_details} 
-          matchScorePoints={match.score_points}
         />
       ) : (
         <Card className={cn("shadow-xl")}>
@@ -157,6 +161,14 @@ const MatchDetailView: React.FC<MatchDetailViewProps> = ({
             {/* This logic might need refinement if we want to show a disabled form for users who can see it but not bet (e.g. match started) */} 
           </CardContent>
         </Card>
+      )}
+
+      {/* Conditionally render Leaderboard */}
+      {points_calculation_done && leaderboard && leaderboard.length > 0 && (
+        <MatchLeaderboard 
+          leaderboardData={leaderboard} 
+          currentUserId={current_user_id}
+        />
       )}
     </div>
   );

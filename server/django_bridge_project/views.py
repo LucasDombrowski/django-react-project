@@ -8,6 +8,7 @@ from django_bridge.response import Response
 # Removed direct import of LoginForm as it's handled by the controller
 from .controllers.auth_controller import AuthController # Import the controller
 from .controllers.match_controller import MatchController # Import the MatchController
+from .controllers.competition_controller import CompetitionController # Import the CompetitionController
 
 def home(request):
     return Response(request, "Home", {})
@@ -32,3 +33,8 @@ def match_detail_view(request, match_id):
         return controller.handle_bet_submission(request, match_id)
     else: # GET or other methods
         return controller.render_match_detail_page(request, match_id)
+
+def competition_detail_view(request, competition_id):
+    controller = CompetitionController()
+    # This page is likely to be GET only for now, unless we add forms later
+    return controller.render_competition_detail_page(request, competition_id)

@@ -25,5 +25,10 @@
   "potential_points_label": "Potential:",
   "actual_winner_label": "Actual Winner:",
   "gained_points_label": "Gained:",
-  "total_gained_points_on_match_label": "Total Points Gained on this Match:"
+  "total_gained_points_on_match_label": "Total Points Gained on this Match:",
+  "leaderboard_title": "Match Leaderboard",
+  "leaderboard_rank_header": "Rank",
+  "leaderboard_player_header": "Player",
+  "leaderboard_points_header": "Points Gained",
+  "leaderboard_no_data": "No leaderboard data available for this match yet."
 } 
