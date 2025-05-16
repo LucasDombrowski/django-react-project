@@ -9,6 +9,45 @@ class PointsAttributionHelper:
             print(f"Warning: PointsAttributionHelper initialized with an unfinished match (ID: {match_instance.id})")
         self.match_instance = match_instance
 
+    @staticmethod
+    def calculate_points_for_prediction_answer(user_answer_value_str: str | None, prediction_instance: Prediction) -> int:
+        """
+        Calculates points for a single prediction answer.
+        Returns the prediction's score_points if correct, 0 otherwise.
+        """
+        if user_answer_value_str is None or user_answer_value_str == '' or \
+           prediction_instance.correct_value is None or prediction_instance.correct_value == '':
+            return 0
+
+        is_correct = False
+        correct_value_str = str(prediction_instance.correct_value)
+        # user_answer_value_str is already passed as a string
+
+        if prediction_instance.prediction_type == PredictionType.BOOLEAN.value:
+            is_correct = user_answer_value_str.lower() == correct_value_str.lower()
+        elif prediction_instance.prediction_type == PredictionType.PLAYER.value:
+            is_correct = user_answer_value_str == correct_value_str
+        elif prediction_instance.prediction_type == PredictionType.NUMERICAL.value:
+            try:
+                is_correct = float(user_answer_value_str) == float(correct_value_str)
+            except ValueError:
+                is_correct = False
+        else:
+            is_correct = user_answer_value_str == correct_value_str
+        
+        return prediction_instance.score_points if is_correct else 0
+
+    @staticmethod
+    def calculate_points_for_match_winner(predicted_winner_id: int, actual_winner_id: int, match_score_points: int) -> int:
+        """
+        Calculates points for correctly predicting the match winner.
+        predicted_winner_id = 0 for a predicted draw.
+        actual_winner_id = 0 for an actual draw.
+        """
+        if predicted_winner_id == actual_winner_id:
+            return match_score_points
+        return 0
+
     def _determine_actual_winner_team_id(self):
         """Determines the ID of the winning team or 0 for a draw."""
         m = self.match_instance
@@ -48,55 +87,38 @@ class PointsAttributionHelper:
         total_points_awarded_for_match = 0
 
         for bet in bets:
-            points_for_this_bet = 0
+            user_total_points_for_this_bet = 0 # Renamed for clarity within this loop
             user = bet.user
 
             # 1. Check predicted winner
             predicted_winner_id = bet.winner_team_id if bet.winner_team else 0 # 0 for predicted draw
-            if predicted_winner_id == actual_winner_id:
-                points_for_this_bet += self.match_instance.score_points
+            
+            # Use the new static method for match winner points
+            user_total_points_for_this_bet += PointsAttributionHelper.calculate_points_for_match_winner(
+                predicted_winner_id,
+                actual_winner_id,
+                self.match_instance.score_points
+            )
 
             # 2. Check answers for each prediction
             answers_map = {answer.prediction_id: answer for answer in bet.answers.all()}
             for prediction in match_predictions:
-                if prediction.correct_value is None or prediction.correct_value == '':
-                    continue # Skip if correct value isn't set for the prediction
-                
                 user_answer = answers_map.get(prediction.id)
-                if user_answer and user_answer.value is not None and user_answer.value != '':
-                    # Comparison logic might need to be more robust based on type
-                    # For now, assuming direct string comparison after ensuring both are strings
-                    is_correct = False
-                    correct_value_str = str(prediction.correct_value)
-                    user_answer_value_str = str(user_answer.value)
-
-                    if prediction.prediction_type == PredictionType.BOOLEAN.value:
-                        # Normalize boolean strings for comparison, e.g., 'True' vs 'true'
-                        is_correct = user_answer_value_str.lower() == correct_value_str.lower()
-                    elif prediction.prediction_type == PredictionType.PLAYER.value:
-                        # Assuming IDs are stored as strings
-                        is_correct = user_answer_value_str == correct_value_str
-                    elif prediction.prediction_type == PredictionType.NUMERICAL.value:
-                        # For numerical, direct string comparison if format is consistent, 
-                        # or convert to number if variations are possible (e.g. "5" vs "5.0")
-                        # For simplicity, direct string comparison now. Ensure data consistency.
-                        try:
-                            is_correct = float(user_answer_value_str) == float(correct_value_str)
-                        except ValueError:
-                            is_correct = False # If conversion fails, it's not a match
-                    else:
-                        is_correct = user_answer_value_str == correct_value_str # Default case
-
-                    if is_correct:
-                        points_for_this_bet += prediction.score_points
+                if user_answer:
+                    # Use the new static method
+                    points_for_this_answer = PointsAttributionHelper.calculate_points_for_prediction_answer(
+                        str(user_answer.value), # Ensure it's a string
+                        prediction
+                    )
+                    user_total_points_for_this_bet += points_for_this_answer
             
-            if points_for_this_bet > 0:
-                user.score = (user.score or 0) + points_for_this_bet # Ensure user.score is not None
+            if user_total_points_for_this_bet > 0:
+                user.score = (user.score or 0) + user_total_points_for_this_bet # Ensure user.score is not None
                 user.save(update_fields=['score'])
-                total_points_awarded_for_match += points_for_this_bet
+                total_points_awarded_for_match += user_total_points_for_this_bet
                 if user.id not in processed_users:
                     processed_users[user.id] = 0
-                processed_users[user.id] += points_for_this_bet
+                processed_users[user.id] += user_total_points_for_this_bet
 
         print(f"Points attribution completed for match {self.match_instance.id}. Total points awarded: {total_points_awarded_for_match}")
         return {

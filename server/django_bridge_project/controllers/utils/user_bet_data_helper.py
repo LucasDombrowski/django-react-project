@@ -1,5 +1,6 @@
 from django_bridge_project.models import Bet, Answer, Prediction, Team, Player, Match
 from django_bridge_project.enums.prediction_types import PredictionType
+from django_bridge_project.services.points_attribution_helper import PointsAttributionHelper
 
 class UserBetDataHelper:
     def __init__(self, user, match_instance: Match):
@@ -76,19 +77,22 @@ class UserBetDataHelper:
 
         points_have_been_calculated = self.match_instance.points_calculation_done
         total_gained_points_for_match = 0
-        actual_match_winner_info = None
+
         if points_have_been_calculated:
             actual_match_winner_info = self._determine_actual_winner_team_details()
             chosen_winner_details['actual_winner_details'] = actual_match_winner_info
-            gained_points_for_winner = 0
-            predicted_winner_id = user_bet.winner_team_id if user_bet.winner_team else 0
             
+            predicted_winner_id = user_bet.winner_team_id if user_bet.winner_team else 0
             actual_winner_id_for_comparison = actual_match_winner_info['id']
-            if actual_match_winner_info['is_draw'] and actual_match_winner_info['id'] is None : # Actual draw is id 0 for comparison
+            if actual_match_winner_info['is_draw'] and actual_match_winner_info['id'] is None:
                  actual_winner_id_for_comparison = 0
 
-            if predicted_winner_id == actual_winner_id_for_comparison:
-                gained_points_for_winner = self.match_instance.score_points
+            # Use the static method from PointsAttributionHelper for match winner points
+            gained_points_for_winner = PointsAttributionHelper.calculate_points_for_match_winner(
+                predicted_winner_id,
+                actual_winner_id_for_comparison, # Ensure this is 0 for draw
+                self.match_instance.score_points
+            )
             
             chosen_winner_details['gained_points_for_winner'] = gained_points_for_winner
             total_gained_points_for_match += gained_points_for_winner
@@ -118,28 +122,12 @@ class UserBetDataHelper:
             if points_have_been_calculated:
                 answer_data['correct_value_display'] = self._get_displayable_correct_value(pred)
                 gained_points_for_answer = 0
-                if user_answer_instance and user_answer_instance.value is not None and user_answer_instance.value != '' and \
-                   pred.correct_value is not None and pred.correct_value != '':
-                    
-                    is_correct = False
-                    correct_value_str = str(pred.correct_value)
-                    user_answer_value_str = str(user_answer_instance.value)
-
-                    if pred.prediction_type == PredictionType.BOOLEAN.value:
-                        is_correct = user_answer_value_str.lower() == correct_value_str.lower()
-                    elif pred.prediction_type == PredictionType.PLAYER.value:
-                        is_correct = user_answer_value_str == correct_value_str
-                    elif pred.prediction_type == PredictionType.NUMERICAL.value:
-                        try:
-                            is_correct = float(user_answer_value_str) == float(correct_value_str)
-                        except ValueError:
-                            is_correct = False
-                    else:
-                        is_correct = user_answer_value_str == correct_value_str
-                    
-                    if is_correct:
-                        gained_points_for_answer = pred.score_points
-                
+                if user_answer_instance:
+                    # Use the static method from PointsAttributionHelper
+                    gained_points_for_answer = PointsAttributionHelper.calculate_points_for_prediction_answer(
+                        str(user_answer_instance.value) if user_answer_instance.value is not None else None, 
+                        pred
+                    )
                 answer_data['gained_points'] = gained_points_for_answer
                 total_gained_points_for_match += gained_points_for_answer
             
