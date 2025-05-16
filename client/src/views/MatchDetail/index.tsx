@@ -3,7 +3,10 @@ import { MatchData } from '@/libs/types/models/matchData';
 // import MatchSection from '@/components/match/MatchSection'; // No longer needed
 import TeamDisplay from '@/components/match/TeamDisplay'; // Updated path alias
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'; // Import ShadCN Card components
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"; // Import Avatar for competition logo
+import { Badge } from "@/components/ui/badge"; // Import Badge for status
 import { cn } from '@/libs/utils'; // Import cn utility
+import matchDetailStrings from '@/libs/keychains/matchDetail.json'; // Import keychain
 // Note: Competition, Team, Player, Prediction are implicitly used through MatchData
 
 // Removed import { MatchDetailViewProps } from '../../libs/types/matchDetailViewProps';
@@ -37,15 +40,18 @@ const MatchDetailView: React.FC<MatchDetailViewProps> = ({ match }) => {
       {/* Competition Section */}
       <Card className={cn("mb-8 text-center", "shadow-xl")}>
         <CardHeader>
-          {competition.logo_url && (
-            <img
-              src={competition.logo_url}
-              alt={`${competition.name} logo`}
-              className="w-24 h-24 mx-auto mb-4 rounded-full object-contain"
-            />
+          {competition.logo_url ? (
+            <Avatar className={cn("w-24 h-24 mx-auto mb-4")}>
+              <AvatarImage src={competition.logo_url} alt={`${competition.name}${matchDetailStrings.alt_logo_suffix}`} />
+              <AvatarFallback>{competition.name.substring(0, 1)}</AvatarFallback>
+            </Avatar>
+          ) : (
+            <div className="w-24 h-24 mx-auto mb-4 flex items-center justify-center bg-muted rounded-full">
+              <span className="text-3xl text-muted-foreground">{competition.name.substring(0,1)}</span>
+            </div>
           )}
-          <CardTitle className="text-4xl font-bold text-teal-600">{competition.name}</CardTitle>
-          <CardDescription className="text-xl text-gray-600">{match.name.split('(')[0].trim()}</CardDescription>
+          <CardTitle className="text-4xl font-bold text-foreground">{competition.name}</CardTitle>
+          <CardDescription className="text-xl text-muted-foreground">{match.name.split('(')[0].trim()}</CardDescription>
         </CardHeader>
       </Card>
 
@@ -53,39 +59,27 @@ const MatchDetailView: React.FC<MatchDetailViewProps> = ({ match }) => {
       <Card className={cn("mb-8", "shadow-xl")}>
         <CardContent className="pt-6"> {/* Added pt-6 for padding similar to previous p-6 on section */}
           <div className="flex items-center justify-around text-center">
-            <TeamDisplay team={team_one} nameColorClass="text-blue-600" />
+            <TeamDisplay team={team_one} />
 
             {/* Score / VS / Date / Status */}
             <div className="flex flex-col items-center">
-              <p className="text-6xl font-bold text-yellow-500">
+              <p className="text-6xl font-bold text-foreground">
                 {team_one_score} - {team_two_score}
               </p>
-              <span className="text-2xl text-gray-700 mt-2">VS</span>
-              <p className="text-sm text-gray-500 mt-3 italic">{matchDate}</p>
-              <p className="text-lg font-semibold mt-3">
-                Status: <span className={is_finished ? "text-green-600" : "text-orange-500"}>
-                  {is_finished ? "Finished" : "Upcoming / In Progress"}
-                </span>
-              </p>
+              <span className="text-2xl text-muted-foreground mt-2">{matchDetailStrings.vs_text}</span>
+              <p className="text-sm text-muted-foreground mt-3 italic">{matchDate}</p>
+              <div className="mt-3">
+                <Badge variant={is_finished ? "default" : "secondary"} className="text-lg px-3 py-1">
+                  {matchDetailStrings.status_prefix}
+                  {is_finished ? matchDetailStrings.status_finished : matchDetailStrings.status_upcoming}
+                </Badge>
+              </div>
             </div>
 
-            <TeamDisplay team={team_two} nameColorClass="text-red-600" />
+            <TeamDisplay team={team_two} />
           </div>
         </CardContent>
-      </Card>
-
-      {/* Match Status and Date Section - REMOVED */}
-      {/* 
-      <MatchSection className="text-center">
-        <p className="text-2xl font-semibold mb-2">
-          Status: <span className={is_finished ? "text-green-600" : "text-orange-500"}>
-            {is_finished ? "Finished" : "Upcoming / In Progress"}
-          </span>
-        </p>
-        <p className="text-lg text-gray-600">Date: {matchDate}</p>
-      </MatchSection>
-      */}
-      
+      </Card>      
     </div>
   );
 };
