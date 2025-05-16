@@ -2,7 +2,15 @@
 
 This template provides a minimal set up to get a React and Django project running.
 
-## Running it
+## Fast setup
+
+The root folder contains a docker-compose.yml file and Makefile containing some shortcuts for docker compose.
+
+To create the Docker environment, run `make setup`. Once that's finished, run `make start` to boot it up.
+
+Your new Django Bridge project should be running on `localhost:8000`!
+
+## Running it without Docker
 
 The React code is built and served by Vite, so you need to run this alongside Django.
 
