@@ -70,7 +70,7 @@ const MatchDetailView: React.FC<MatchDetailViewProps> = ({
   });
 
   return (
-    <Layout isAuthenticated={isAuthenticated} currentUser={currentUser}>
+    <Layout isAuthenticated={isAuthenticated} currentUser={currentUser} csrfToken={csrfToken}>
       {/* Display Django Messages */}
       {messages && messages.length > 0 && (
         <div className="mb-6 space-y-4">
@@ -94,7 +94,7 @@ const MatchDetailView: React.FC<MatchDetailViewProps> = ({
         <CardHeader>
           {competition.logo_url ? (
             <Avatar className={cn("w-24 h-24 mx-auto mb-4")}>
-              <AvatarImage src={competition.logo_url} alt={`${competition.name}${matchDetailStrings.alt_logo_suffix}`} />
+              <AvatarImage src={competition.logo_url} alt={`${competition.name}${matchDetailStrings.alt_logo_suffix}`} className='object-cover'/>
               <AvatarFallback>{competition.name.substring(0, 1)}</AvatarFallback>
             </Avatar>
           ) : (

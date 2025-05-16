@@ -46,3 +46,13 @@ def competition_detail_view(request, competition_id):
 def team_detail_view(request, team_id):
     controller = TeamController()
     return controller.render_team_detail_page(request, team_id)
+
+def logout_view(request):
+    auth_controller = AuthController()
+    # Logout should ideally be a POST request for security (CSRF protection)
+    # but Django's default logout can also handle GET if linked directly.
+    # For a form submission, POST is preferred.
+    # If the header link is a simple <a> tag, it will be GET.
+    # If it's a form, it should be POST.
+    # The AuthController.logout_user handles the actual logout logic.
+    return auth_controller.logout_user(request)

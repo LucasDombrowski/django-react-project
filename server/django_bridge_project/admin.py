@@ -116,16 +116,8 @@ class PredictionInline(admin.StackedInline):
             except (Match.DoesNotExist, ValueError):
                 pass 
 
-        # Base read-only fields from superclass or class attribute
-        # For PredictionInline, 'correct_value' is read-only in the change_page_fieldsets 'Outcome' section by design
-        # when the form is otherwise editable.
-        default_readonly = list(super().get_readonly_fields(request, obj) or [])
-        if obj: # If it's an existing prediction (change form for the inline)
-            default_readonly.append('correct_value')
-
+        # If points are calculated for the parent match, make ALL fields in the inline read-only.
         if parent_match and parent_match.points_calculation_done:
-            # If points are calculated, make ALL fields in the inline read-only.
-            # The custom display method for 'correct_value' should still be used.
             all_inline_fields = set()
             for _fieldset_name, fieldset_options in self.get_fieldsets(request, obj):
                 if 'fields' in fieldset_options:
@@ -136,7 +128,10 @@ class PredictionInline(admin.StackedInline):
                             all_inline_fields.add(field)
             return list(all_inline_fields)
         
-        return list(set(default_readonly)) # Ensure unique fields
+        # Otherwise (points not calculated or no parent match context), 
+        # rely on superclass or default behavior. 
+        # 'correct_value' should be editable in this case.
+        return list(super().get_readonly_fields(request, obj) or [])
 
     def correct_value(self, obj):
         """Custom display for the read-only correct_value field."""
@@ -181,7 +176,7 @@ class MatchAdmin(admin.ModelAdmin):
         }),
         ('Match Result', {
             'classes': ('collapse',),
-            'fields': ('team_one_score', 'team_two_score', 'team_one_draw_score', 'team_two_draw_score', 'is_finished', 'points_calculation_done'),
+            'fields': ('team_one_score', 'team_two_score', 'team_one_draw_score', 'team_two_draw_score', 'is_finished'),
         }),
     )
 

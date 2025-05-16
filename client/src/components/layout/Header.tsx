@@ -9,16 +9,17 @@ import layoutStrings from '@/libs/keychains/layout.json';
 interface HeaderProps {
   isAuthenticated: boolean;
   currentUser: CurrentUser | null;
+  csrfToken: string;
 }
 
-const Header: React.FC<HeaderProps> = ({ isAuthenticated, currentUser }) => {
+const Header: React.FC<HeaderProps> = ({ isAuthenticated, currentUser, csrfToken }) => {
   const getInitials = (name: string) => {
     if (!name) return '';
     return name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-4">
       <div className="container flex h-14 max-w-screen-2xl items-center">
         <Link href="/" className="mr-6 flex items-center space-x-2">
           <Shield className="h-6 w-6 text-primary" />
@@ -26,12 +27,6 @@ const Header: React.FC<HeaderProps> = ({ isAuthenticated, currentUser }) => {
             {layoutStrings.app_name}
           </span>
         </Link>
-        
-        {/* Optional: Add main navigation links here if needed */}
-        {/* <nav className="flex items-center space-x-6 text-sm font-medium"> */}
-        {/*   <Link href="/matches" className="transition-colors hover:text-foreground/80 text-foreground/60">Matches</Link> */}
-        {/*   <Link href="/competitions" className="transition-colors hover:text-foreground/80 text-foreground/60">Competitions</Link> */}
-        {/* </nav> */}
 
         <div className="flex flex-1 items-center justify-end space-x-2">
           {isAuthenticated && currentUser ? (
@@ -48,7 +43,7 @@ const Header: React.FC<HeaderProps> = ({ isAuthenticated, currentUser }) => {
               <form action="/logout/" method="post" className="contents">
                  {/* Assuming you have a CSRF token solution for forms or an API endpoint for logout */}
                  {/* If using Django's default logout, it might need a CSRF token */}
-                 {/* <input type="hidden" name="csrfmiddlewaretoken" value={getCsrfTokenSomehow()} /> */}
+                 <input type="hidden" name="csrfmiddlewaretoken" value={csrfToken} />
                 <Button variant="outline" size="sm" type="submit">
                   <LogOut className="mr-0 sm:mr-2 h-4 w-4" />
                   <span className="hidden sm:inline-block">{layoutStrings.logout_button_text}</span>

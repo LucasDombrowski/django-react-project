@@ -14,6 +14,7 @@ import CompetitionListItem from '@/components/competition/CompetitionListItem';
 export interface HomeViewProps extends HomePageData {
   isAuthenticated: boolean;
   currentUser: CurrentUser | null;
+  csrfToken: string;
 }
 
 const HomeView: React.FC<HomeViewProps> = ({
@@ -24,6 +25,7 @@ const HomeView: React.FC<HomeViewProps> = ({
   current_user_id,
   isAuthenticated,
   currentUser,
+  csrfToken,
 }) => {
 
   const leaderboardStrings = {
@@ -35,7 +37,7 @@ const HomeView: React.FC<HomeViewProps> = ({
   };
 
   return (
-    <Layout isAuthenticated={isAuthenticated} currentUser={currentUser}>
+    <Layout isAuthenticated={isAuthenticated} currentUser={currentUser} csrfToken={csrfToken}>
       <div className="container mx-auto p-4 sm:p-6 lg:p-8">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
           {/* Main Content Area */}

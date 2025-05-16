@@ -3,6 +3,7 @@ from django_bridge_project.models import Competition # Removed Match, Team as th
 from django_bridge.response import Response
 # from django.urls import reverse # Not strictly needed here anymore
 from .utils.competition_data_helper import CompetitionDataHelper # Import the new helper
+from django.middleware.csrf import get_token # Added import
 
 class CompetitionController:
     """
@@ -33,6 +34,7 @@ class CompetitionController:
             "competition": serialized_competition_data,
             "isAuthenticated": request.user.is_authenticated,
             "currentUser": current_user_data,
+            "csrfToken": get_token(request), # Added csrfToken
         }
         
         return Response(request, "CompetitionDetailView", props) 

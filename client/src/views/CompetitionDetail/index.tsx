@@ -13,9 +13,10 @@ export interface CompetitionDetailViewProps {
   competition: CompetitionData;
   isAuthenticated: boolean;
   currentUser: CurrentUser | null;
+  csrfToken: string;
 }
 
-const CompetitionDetailView: React.FC<CompetitionDetailViewProps> = ({ competition, isAuthenticated, currentUser }) => {
+const CompetitionDetailView: React.FC<CompetitionDetailViewProps> = ({ competition, isAuthenticated, currentUser, csrfToken }) => {
   const { name, logo_url, start_date, end_date, matches } = competition;
 
   const formatDate = (dateString: string) => {
@@ -33,7 +34,7 @@ const CompetitionDetailView: React.FC<CompetitionDetailViewProps> = ({ competiti
   };
 
   return (
-    <Layout isAuthenticated={isAuthenticated} currentUser={currentUser}>
+    <Layout isAuthenticated={isAuthenticated} currentUser={currentUser} csrfToken={csrfToken}>
       <div className="container mx-auto p-4 sm:p-6 lg:p-8 min-h-screen bg-background">
         {/* Competition Header */}
         <Card className={cn("mb-0 shadow-xl overflow-hidden border-border")}>

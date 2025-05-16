@@ -21,7 +21,7 @@ const TeamDisplay: React.FC<TeamDisplayProps> = ({ team }) => {
     return (
         <div className="flex flex-col items-center w-1/3">
             <Avatar className={cn("w-32 h-32 mb-3 shadow-md")}> {/* Increased size & added shadow */}
-                <AvatarImage src={team.logo_url || undefined} alt={`${team.name}${matchDetailStrings.alt_logo_suffix}`} />
+                <AvatarImage src={team.logo_url || undefined} alt={`${team.name}${matchDetailStrings.alt_logo_suffix}`} className="object-cover" />
                 <AvatarFallback className="text-3xl">
                     {team.name.substring(0, 2).toUpperCase()} {/* Example Fallback: First two letters */}
                 </AvatarFallback>

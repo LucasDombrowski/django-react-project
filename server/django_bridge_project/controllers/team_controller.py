@@ -2,6 +2,7 @@ from django.shortcuts import get_object_or_404
 from django_bridge_project.models import Team
 from django_bridge.response import Response
 from .utils.team_data_helper import TeamDataHelper
+from django.middleware.csrf import get_token
 
 class TeamController:
     """
@@ -29,6 +30,7 @@ class TeamController:
             "team": serialized_team_data,
             "isAuthenticated": request.user.is_authenticated,
             "currentUser": current_user_data,
+            "csrfToken": get_token(request),
         }
         
         return Response(request, "TeamDetailView", props) 

@@ -14,9 +14,10 @@ export interface TeamDetailViewProps {
   team: TeamData;
   isAuthenticated: boolean;
   currentUser: CurrentUser | null;
+  csrfToken: string;
 }
 
-const TeamDetailView: React.FC<TeamDetailViewProps> = ({ team, isAuthenticated, currentUser }) => {
+const TeamDetailView: React.FC<TeamDetailViewProps> = ({ team, isAuthenticated, currentUser, csrfToken }) => {
   const { name, logo_url, players, matches } = team;
 
   const getInitials = (nameStr: string) => {
@@ -25,7 +26,7 @@ const TeamDetailView: React.FC<TeamDetailViewProps> = ({ team, isAuthenticated, 
   };
 
   return (
-    <Layout isAuthenticated={isAuthenticated} currentUser={currentUser}>
+    <Layout isAuthenticated={isAuthenticated} currentUser={currentUser} csrfToken={csrfToken}>
       <div className="container mx-auto p-4 sm:p-6 lg:p-8 min-h-screen bg-background">
         {/* Team Header */}
         <Card className={cn("mb-0 shadow-xl overflow-hidden border-border")}>

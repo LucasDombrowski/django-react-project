@@ -1,7 +1,8 @@
 from django.shortcuts import redirect, render
-from django.contrib.auth import login
+from django.contrib.auth import login, logout
 from django.urls import reverse
 from django.views import View # Import Django's base View class
+from django.middleware.csrf import get_token # Added import
 
 from django_bridge.response import Response
 
@@ -19,6 +20,7 @@ class AuthController(View):
         return {
             "isAuthenticated": request.user.is_authenticated,
             "currentUser": current_user_data,
+            "csrfToken": get_token(request), # Added csrfToken
         }
 
     def display_login_form(self, request, *args, **kwargs):
@@ -69,3 +71,7 @@ class AuthController(View):
             **self._get_common_props(request)
         }
         return Response(request, "RegisterView", props) 
+
+    def logout_user(self, request, *args, **kwargs):
+        logout(request)
+        return redirect(reverse('home')) 

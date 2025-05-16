@@ -1,6 +1,7 @@
 from django.utils import timezone
 from datetime import timedelta
 from django_bridge_project.models import CustomUser, Match, Team, Competition
+from django.middleware.csrf import get_token
 
 class HomeDataHelper:
     def __init__(self, request):
@@ -87,4 +88,5 @@ class HomeDataHelper:
             "current_user_id": current_user_id, # Kept for existing GenericLeaderboard logic if needed, but ideally use currentUser directly
             "isAuthenticated": self.request.user.is_authenticated,
             "currentUser": current_user_data,
+            "csrfToken": get_token(self.request),
         } 
