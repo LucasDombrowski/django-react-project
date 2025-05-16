@@ -11,10 +11,19 @@
   "submit_bet_button_text": "Submit Bet",
   "user_bet_display_title": "Your Submitted Bet",
   "user_bet_display_description": "Here are the predictions you made for this match.",
-  "user_bet_display_predicted_winner_title": "Predicted Match Winner",
+  "user_bet_display_description_results_in": "Match results are in! Here is how your bet performed:",
+  "user_bet_display_predicted_winner_title": "Match Winner Prediction",
   "user_bet_display_detailed_predictions_title": "Your Detailed Predictions:",
-  "user_bet_display_table_header_prediction": "Prediction",
+  "user_bet_display_table_header_prediction": "Prediction Criteria",
   "user_bet_display_table_header_your_answer": "Your Answer",
   "user_bet_display_table_header_points": "Points",
-  "user_bet_display_answer_prefix": "Your Answer: "
+  "user_bet_display_table_header_correct_answer": "Correct Answer",
+  "user_bet_display_table_header_gained_points": "Gained Points",
+  "user_bet_display_table_header_potential_points": "Potential Points",
+  "user_bet_display_answer_prefix": "Your Answer: ",
+  "your_prediction_label": "Your Prediction:",
+  "potential_points_label": "Potential:",
+  "actual_winner_label": "Actual Winner:",
+  "gained_points_label": "Gained:",
+  "total_gained_points_on_match_label": "Total Points Gained on this Match:"
 } 

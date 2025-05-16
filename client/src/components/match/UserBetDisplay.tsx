@@ -22,62 +22,102 @@ import { UserBetDetailsType } from '@/libs/types/bets';
 
 interface UserBetDisplayProps {
   details: UserBetDetailsType;
-  matchScorePoints?: number; // Pass match.score_points specifically for winner
+  // matchScorePoints is now part of details.chosen_winner.score_points
 }
 
-const UserBetDisplay: React.FC<UserBetDisplayProps> = ({ details, matchScorePoints }) => {
+const UserBetDisplay: React.FC<UserBetDisplayProps> = ({ details }) => {
   if (!details) return null;
 
-  const winnerPoints = details.chosen_winner?.score_points ?? matchScorePoints;
+  const { chosen_winner, answers, points_have_been_calculated, total_gained_points } = details;
 
   return (
     <Card className={cn("shadow-xl", "w-full")}>
       <CardHeader>
         <CardTitle className="text-2xl font-semibold text-foreground">{matchDetailStrings.user_bet_display_title}</CardTitle>
         <CardDescription className="text-muted-foreground">
-          {matchDetailStrings.user_bet_display_description}
+          {points_have_been_calculated ? 
+            matchDetailStrings.user_bet_display_description_results_in :
+            matchDetailStrings.user_bet_display_description
+          }
         </CardDescription>
+        {points_have_been_calculated && total_gained_points !== undefined && (
+            <div className="mt-2 text-lg font-semibold">
+                <span className="text-primary">{matchDetailStrings.total_gained_points_on_match_label} </span> 
+                <Badge variant={total_gained_points > 0 ? "default" : "secondary"} className="text-lg">{total_gained_points} pts</Badge>
+            </div>
+        )}
       </CardHeader>
       <CardContent className="space-y-6">
-        {/* Display Predicted Winner Separately */}
-        {details.chosen_winner && (
+        {chosen_winner && (
           <Card className="bg-muted/50">
             <CardHeader>
               <CardTitle className="text-xl">{matchDetailStrings.user_bet_display_predicted_winner_title}</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="space-y-2">
               <div className="flex justify-between items-center">
                 <p className="text-lg text-primary">
-                  {details.chosen_winner.name}
+                  {matchDetailStrings.your_prediction_label} {chosen_winner.name}
                 </p>
-                {winnerPoints !== undefined && (
-                    <Badge variant="outline" className="text-base">
-                        {winnerPoints} pts
+                {chosen_winner.score_points !== undefined && (
+                    <Badge variant="outline" className="text-sm">
+                        {matchDetailStrings.potential_points_label} {chosen_winner.score_points} pts
                     </Badge>
                 )}
               </div>
+              {points_have_been_calculated && chosen_winner.actual_winner_details && (
+                <div className="mt-2 pt-2 border-t">
+                  <div className="flex justify-between items-center">
+                    <p className="text-md font-semibold">
+                        {matchDetailStrings.actual_winner_label} {chosen_winner.actual_winner_details.name}
+                    </p>
+                    <Badge 
+                        variant={(chosen_winner.gained_points_for_winner ?? 0) > 0 ? "default" : "secondary"}
+                        className="text-sm"
+                    >
+                       {matchDetailStrings.gained_points_label} {chosen_winner.gained_points_for_winner ?? 0} pts
+                    </Badge>
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
         )}
 
-        {/* Display Prediction Answers in a Table */}
         <div>
           <h3 className="text-xl font-semibold text-foreground mb-4">{matchDetailStrings.user_bet_display_detailed_predictions_title}</h3>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[60%]">{matchDetailStrings.user_bet_display_table_header_prediction}</TableHead>
+                <TableHead className="w-[40%]">{matchDetailStrings.user_bet_display_table_header_prediction}</TableHead>
                 <TableHead>{matchDetailStrings.user_bet_display_table_header_your_answer}</TableHead>
-                <TableHead className="text-right">{matchDetailStrings.user_bet_display_table_header_points}</TableHead>
+                {points_have_been_calculated && (
+                  <>
+                    <TableHead>{matchDetailStrings.user_bet_display_table_header_correct_answer}</TableHead>
+                    <TableHead className="text-right">{matchDetailStrings.user_bet_display_table_header_gained_points}</TableHead>
+                  </>
+                )}
+                <TableHead className="text-right">{matchDetailStrings.user_bet_display_table_header_potential_points}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {details.answers.map((answer) => (
+              {answers.map((answer) => (
                 <TableRow key={answer.prediction_id}>
                   <TableCell className="font-medium text-foreground">{answer.prediction_label}</TableCell>
                   <TableCell className="text-primary">{`${answer.user_answer_display}`}</TableCell>
+                  {points_have_been_calculated && (
+                    <>
+                      <TableCell className="text-muted-foreground">{answer.correct_value_display ?? 'N/A'}</TableCell>
+                      <TableCell className="text-right">
+                        <Badge 
+                            variant={(answer.gained_points ?? 0) > 0 ? "default" : "secondary"}
+                        >
+                            {answer.gained_points ?? 0} pts
+                        </Badge>
+                      </TableCell>
+                    </>
+                  )}
                   <TableCell className="text-right">
-                    <Badge variant="secondary">{answer.prediction_score_points} pts</Badge>
+                    <Badge variant="outline">{answer.prediction_score_points} pts</Badge>
                   </TableCell>
                 </TableRow>
               ))}

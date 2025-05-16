@@ -39,8 +39,14 @@ class PredictionAdminForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Ensure this logic runs only for existing instances with a prediction_type and match
-        if self.instance and self.instance.pk and self.instance.prediction_type and hasattr(self.instance, 'match') and self.instance.match:
+        
+        # Ensure this logic runs only if 'correct_value' is an active field in this form instance
+        # and we are dealing with an existing prediction instance tied to a match.
+        if 'correct_value' in self.fields and \
+           self.instance and self.instance.pk and \
+           self.instance.prediction_type and \
+           hasattr(self.instance, 'match') and self.instance.match:
+            
             prediction_type = self.instance.prediction_type
             match_instance = self.instance.match
 
@@ -76,36 +82,87 @@ class PredictionInline(admin.StackedInline):
     model = Prediction
     form = PredictionAdminForm # Assign the custom form
     extra = 1
-    # Simplified fieldset, description is now in model field's help_text
-    # fields = ('label', 'prediction_type', 'score_points', 'correct_value') # We'll use fieldsets instead
+    # fieldsets are defined below
 
-    # Define the fieldsets for the 'add' page of the parent (Match)
     add_page_fieldsets = (
         (None, {
             'fields': ('label', 'prediction_type', 'score_points')
         }),
     )
 
-    # Define the fieldsets for the 'change' page of the parent (Match)
     change_page_fieldsets = (
         (None, {
             'fields': ('label', 'prediction_type', 'score_points')
         }),
         ('Outcome (Set after match is finished)', {
-            'classes': ('collapse',), # Keep it collapsed by default on change page
+            'classes': ('collapse',), 
             'fields': ('correct_value',)
         }),
     )
 
     def get_fieldsets(self, request, obj=None):
-        if not obj:  # This is an add form for the Match (parent obj is None)
+        if not obj: 
             return self.add_page_fieldsets
-        return self.change_page_fieldsets # This is a change form for the Match
+        return self.change_page_fieldsets
+
+    def get_readonly_fields(self, request, obj=None):
+        parent_match = None
+        if obj and hasattr(obj, 'match') and obj.match:
+            parent_match = obj.match
+        elif hasattr(request, 'resolver_match') and request.resolver_match and 'object_id' in request.resolver_match.kwargs:
+            try:
+                match_id = request.resolver_match.kwargs['object_id']
+                parent_match = Match.objects.get(pk=match_id)
+            except (Match.DoesNotExist, ValueError):
+                pass 
+
+        # Base read-only fields from superclass or class attribute
+        # For PredictionInline, 'correct_value' is read-only in the change_page_fieldsets 'Outcome' section by design
+        # when the form is otherwise editable.
+        default_readonly = list(super().get_readonly_fields(request, obj) or [])
+        if obj: # If it's an existing prediction (change form for the inline)
+            default_readonly.append('correct_value')
+
+        if parent_match and parent_match.points_calculation_done:
+            # If points are calculated, make ALL fields in the inline read-only.
+            # The custom display method for 'correct_value' should still be used.
+            all_inline_fields = set()
+            for _fieldset_name, fieldset_options in self.get_fieldsets(request, obj):
+                if 'fields' in fieldset_options:
+                    for field in fieldset_options['fields']:
+                        if isinstance(field, (list, tuple)):
+                            all_inline_fields.update(f for f in field if isinstance(f, str))
+                        elif isinstance(field, str):
+                            all_inline_fields.add(field)
+            return list(all_inline_fields)
+        
+        return list(set(default_readonly)) # Ensure unique fields
+
+    def correct_value(self, obj):
+        """Custom display for the read-only correct_value field."""
+        if obj is None or obj.correct_value is None or obj.correct_value == '':
+            return "-" 
+
+        if obj.prediction_type == PredictionType.PLAYER.value:
+            try:
+                player_id = int(obj.correct_value)
+                player = Player.objects.get(pk=player_id)
+                return str(player)
+            except (ValueError, Player.DoesNotExist):
+                return f"Invalid Player ID: {obj.correct_value}"
+        elif obj.prediction_type == PredictionType.BOOLEAN.value:
+            if str(obj.correct_value).lower() == 'true':
+                return "Yes"
+            elif str(obj.correct_value).lower() == 'false':
+                return "No"
+            return obj.correct_value 
+        return obj.correct_value 
+    correct_value.short_description = 'Correct Outcome' 
 
 # Custom Admin for Match model
 class MatchAdmin(admin.ModelAdmin):
-    list_display = ('__str__', 'competition', 'start_datetime', 'is_finished')
-    list_filter = ('competition', 'is_finished', 'start_datetime')
+    list_display = ('__str__', 'competition', 'start_datetime', 'is_finished', 'points_calculation_done')
+    list_filter = ('competition', 'is_finished', 'start_datetime', 'points_calculation_done')
     search_fields = ('team_one__name', 'team_two__name', 'competition__name')
     inlines = [PredictionInline] # Added PredictionInline here
 
@@ -124,7 +181,7 @@ class MatchAdmin(admin.ModelAdmin):
         }),
         ('Match Result', {
             'classes': ('collapse',),
-            'fields': ('team_one_score', 'team_two_score', 'team_one_draw_score', 'team_two_draw_score', 'is_finished'),
+            'fields': ('team_one_score', 'team_two_score', 'team_one_draw_score', 'team_two_draw_score', 'is_finished', 'points_calculation_done'),
         }),
     )
 
@@ -132,6 +189,15 @@ class MatchAdmin(admin.ModelAdmin):
         if not obj:  # This is an add form (obj is None)
             return self.add_page_fieldsets
         return self.change_page_fieldsets # This is a change form
+
+    def get_readonly_fields(self, request, obj=None):
+        if obj and obj.points_calculation_done:
+            # Make all fields read-only. This should also make inlines non-editable.
+            return [field.name for field in obj._meta.fields]
+        # If you have other fields that are always read-only, you can add them here:
+        # base_readonly_fields = super().get_readonly_fields(request, obj) or [] 
+        # return list(base_readonly_fields)
+        return [] # Default: no fields are read-only unless specified in readonly_fields attribute
 
 # Register other models
 admin.site.register(Competition)
