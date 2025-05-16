@@ -12,21 +12,22 @@ import { Button } from '@/components/ui/button'; // Import Button for login/subm
 import { DjangoProvidedForm } from '@/libs/types/forms'; // Updated import path
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"; // Import Alert components
 import { Terminal } from "lucide-react"; // Optional: for an icon in the Alert
+import UserBetDisplay from '@/components/match/UserBetDisplay'; // Import the new display component
+// Import newly separated types
+import { DjangoMessage } from '@/libs/types/messages';
+import { UserBetDetailsType } from '@/libs/types/bets';
 // Note: Competition, Team, Player, Prediction are implicitly used through MatchData
 
-// Interface for individual messages passed from Django
-interface DjangoMessage {
-  text: string;
-  level: string; // e.g., 'debug', 'info', 'success', 'warning', 'error'
-}
+// Local definitions of DjangoMessage, SerializedPredictionAnswer, UserBetDetailsType are removed.
 
 export interface MatchDetailViewProps {
   match: MatchData;
-  bet_form: DjangoProvidedForm; // Add bet_form
+  bet_form: DjangoProvidedForm | null; // Can be null if user already bet
   isAuthenticated: boolean; // Add isAuthenticated
   csrfToken: string; // Add csrfToken
   action_url: string; // Add action_url
   messages?: DjangoMessage[]; // Add messages prop (optional)
+  user_bet_details?: UserBetDetailsType | null; // User's existing bet
 }
 
 const MatchDetailView: React.FC<MatchDetailViewProps> = ({ 
@@ -35,7 +36,8 @@ const MatchDetailView: React.FC<MatchDetailViewProps> = ({
   isAuthenticated,
   csrfToken,
   action_url,
-  messages = [] // Default to empty array
+  messages = [],
+  user_bet_details = null // Default to null
 }) => {
   const {
     competition,
@@ -120,32 +122,42 @@ const MatchDetailView: React.FC<MatchDetailViewProps> = ({
         </CardContent>
       </Card>
 
-      {/* Bet Form Section */}
-      <Card className={cn("shadow-xl")}>
-        <CardHeader>
-          <CardTitle className="text-2xl font-semibold text-foreground">{matchDetailStrings.bet_form_title}</CardTitle>
-          <CardDescription className="text-muted-foreground">{matchDetailStrings.bet_form_description}</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {!isAuthenticated && (
-            <div className="text-center mb-4 p-4 border border-border rounded-md bg-card">
-              <p className="text-muted-foreground mb-3">{matchDetailStrings.login_to_bet_prompt}</p>
-              <Button asChild>
-                <a href="/login/">{matchDetailStrings.login_button_text}</a>
-              </Button>
-            </div>
-          )}
-          <form method="POST" action={action_url}>
-            <input type="hidden" name="csrfmiddlewaretoken" value={csrfToken} />
-            <StyledBetFormRenderer form={bet_form} isDisabled={!isAuthenticated} />
-            {isAuthenticated && (
-              <Button type="submit" className="w-full mt-6" disabled={!isAuthenticated}>
-                {matchDetailStrings.submit_bet_button_text}
-              </Button>
+      {/* Bet Form Section or User Bet Display Section */}
+      {user_bet_details ? (
+        <UserBetDisplay 
+          details={user_bet_details} 
+          matchScorePoints={match.score_points}
+        />
+      ) : (
+        <Card className={cn("shadow-xl")}>
+          <CardHeader>
+            <CardTitle className="text-2xl font-semibold text-foreground">{matchDetailStrings.bet_form_title}</CardTitle>
+            <CardDescription className="text-muted-foreground">{matchDetailStrings.bet_form_description}</CardDescription>
+          </CardHeader>
+          <CardContent>
+            {!isAuthenticated && (
+              <div className="text-center mb-4 p-4 border border-border rounded-md bg-card">
+                <p className="text-muted-foreground mb-3">{matchDetailStrings.login_to_bet_prompt}</p>
+                <Button asChild>
+                  <a href="/login/">{matchDetailStrings.login_button_text}</a>
+                </Button>
+              </div>
             )}
-          </form>
-        </CardContent>
-      </Card>      
+            {/* Only render form if authenticated and bet_form is provided */}
+            {isAuthenticated && bet_form && (
+              <form method="POST" action={action_url}>
+                <input type="hidden" name="csrfmiddlewaretoken" value={csrfToken} />
+                <StyledBetFormRenderer form={bet_form} isDisabled={!isAuthenticated /* This prop might be redundant here if form isn't shown */} />
+                <Button type="submit" className="w-full mt-6" disabled={!isAuthenticated}>
+                  {matchDetailStrings.submit_bet_button_text}
+                </Button>
+              </form>
+            )}
+            {/* Case: Authenticated, but no form provided (should not happen if no bet_details) - or for readonly view after betting */} 
+            {/* This logic might need refinement if we want to show a disabled form for users who can see it but not bet (e.g. match started) */} 
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };

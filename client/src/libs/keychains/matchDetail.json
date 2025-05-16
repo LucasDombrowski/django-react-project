@@ -8,5 +8,13 @@
   "bet_form_description": "Select your predictions for this match.",
   "login_to_bet_prompt": "You need to be logged in to place a bet.",
   "login_button_text": "Login to Bet",
-  "submit_bet_button_text": "Submit Bet"
+  "submit_bet_button_text": "Submit Bet",
+  "user_bet_display_title": "Your Submitted Bet",
+  "user_bet_display_description": "Here are the predictions you made for this match.",
+  "user_bet_display_predicted_winner_title": "Predicted Match Winner",
+  "user_bet_display_detailed_predictions_title": "Your Detailed Predictions:",
+  "user_bet_display_table_header_prediction": "Prediction",
+  "user_bet_display_table_header_your_answer": "Your Answer",
+  "user_bet_display_table_header_points": "Points",
+  "user_bet_display_answer_prefix": "Your Answer: "
 } 

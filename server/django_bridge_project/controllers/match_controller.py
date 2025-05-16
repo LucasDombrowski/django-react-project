@@ -11,6 +11,7 @@ from django.urls import reverse # To generate action_url
 from django.contrib import messages as django_messages # Use an alias
 from django.db import transaction # Added transaction for atomic operations
 from .utils.match_data_helper import MatchDataHelper # Import the new helper
+from .utils.user_bet_data_helper import UserBetDataHelper # Import the new helper
 
 # It's good practice to define a base controller if you have common functionalities
 # For now, we'll create a simple controller
@@ -31,12 +32,16 @@ class MatchController(View):
             helper = MatchDataHelper(request, match_instance)
             match_data = helper.get_match_data()
 
-            # The local serialization functions (serialize_competition, serialize_team, etc.)
-            # are no longer needed here as their logic is in MatchDataHelper.
+            user_bet_details = None
+            if request.user.is_authenticated:
+                bet_helper = UserBetDataHelper(request.user, match_instance)
+                user_bet_details = bet_helper.get_user_bet_details()
 
             # Use the passed form instance if available (e.g., from a failed POST)
-            # Otherwise, create a new unbound one for GET
-            final_bet_form = bet_form_instance if bet_form_instance is not None else BetFormGenerator.create_bet_form_for_match(match_instance, request=request)
+            # Or if a bet already exists, we don't need to generate/pass the form for new betting
+            final_bet_form = None
+            if not user_bet_details: # Only prepare a new form if no existing bet
+                final_bet_form = bet_form_instance if bet_form_instance is not None else BetFormGenerator.create_bet_form_for_match(match_instance, request=request)
             
             # Extract messages for React
             contrib_messages = django_messages.get_messages(request)
@@ -49,11 +54,12 @@ class MatchController(View):
 
             props = {
                 "match": match_data,
-                "bet_form": final_bet_form, # Use the potentially pre-filled/error form
+                "bet_form": final_bet_form, 
                 "isAuthenticated": request.user.is_authenticated,
                 "csrfToken": get_token(request),
                 "action_url": reverse('match_detail', kwargs={'match_id': match_id}),
-                "messages": messages_for_react # Add messages to props
+                "messages": messages_for_react,
+                "user_bet_details": user_bet_details # Add user_bet_details to props
             }
             
             return Response(request, "MatchDetailView", props)
