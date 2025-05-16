@@ -28,4 +28,7 @@ def registration_view(request):
 
 def match_detail_view(request, match_id):
     controller = MatchController()
-    return controller.render_match_detail_page(request, match_id)
+    if request.method == 'POST':
+        return controller.handle_bet_submission(request, match_id)
+    else: # GET or other methods
+        return controller.render_match_detail_page(request, match_id)

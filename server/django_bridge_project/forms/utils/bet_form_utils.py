@@ -17,12 +17,11 @@ class BetFormGenerator:
         winner_choices = [
             (match.team_one.id, match.team_one.name),
             (match.team_two.id, match.team_two.name),
-            # You might want to add a 'draw' option, e.g., (0, "Draw")
-            # Or handle this based on match.is_winner_needed or a similar field
+            (0, "Draw") # Added Draw option with ID 0
         ]
         form_fields['match_winner'] = forms.ChoiceField(
             choices=winner_choices,
-            label="Predict the Winner",
+            label=f"Predict the Winner ({match.score_points} pts)",
             required=True,
             widget=forms.RadioSelect # Using RadioSelect for better UX
         )
@@ -42,21 +41,21 @@ class BetFormGenerator:
             field_type_enum = PredictionType(prediction.prediction_type) # Convert string to enum member
             field_class = field_type_enum.get_form_field()
             
+            is_required = True # Default to True
+            if field_type_enum == PredictionType.BOOLEAN:
+                is_required = False # Set to False only for Boolean fields
+
             field_kwargs = {
                 'label': field_label,
-                'required': False, # Bets on individual predictions are often optional
+                'required': is_required, 
             }
 
             if field_type_enum == PredictionType.PLAYER:
                 field_kwargs['choices'] = [(None, '----------')] + all_match_players_choices
             
-            if field_type_enum == PredictionType.BOOLEAN:
-                 # BooleanField doesn't need a widget specified for default checkbox
-                 # It also doesn't typically use help_text in the same way, label is key.
-                 pass # Default BooleanField is fine
-
             if field_type_enum == PredictionType.NUMERICAL:
-                field_kwargs['widget'] = forms.NumberInput(attrs={'placeholder': 'Enter a number'})
+                field_kwargs['widget'] = forms.NumberInput(attrs={'placeholder': 'Enter a number', 'min': '0'})
+                field_kwargs['min_value'] = 0
 
             form_fields[field_name] = field_class(**field_kwargs)
 

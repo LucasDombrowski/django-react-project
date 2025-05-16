@@ -10,9 +10,15 @@ import matchDetailStrings from '@/libs/keychains/matchDetail.json'; // Import ke
 import StyledBetFormRenderer from '@/components/forms/StyledBetFormRenderer'; // Import the new form renderer
 import { Button } from '@/components/ui/button'; // Import Button for login/submit
 import { DjangoProvidedForm } from '@/libs/types/forms'; // Updated import path
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"; // Import Alert components
+import { Terminal } from "lucide-react"; // Optional: for an icon in the Alert
 // Note: Competition, Team, Player, Prediction are implicitly used through MatchData
 
-// Removed import { MatchDetailViewProps } from '../../libs/types/matchDetailViewProps';
+// Interface for individual messages passed from Django
+interface DjangoMessage {
+  text: string;
+  level: string; // e.g., 'debug', 'info', 'success', 'warning', 'error'
+}
 
 export interface MatchDetailViewProps {
   match: MatchData;
@@ -20,6 +26,7 @@ export interface MatchDetailViewProps {
   isAuthenticated: boolean; // Add isAuthenticated
   csrfToken: string; // Add csrfToken
   action_url: string; // Add action_url
+  messages?: DjangoMessage[]; // Add messages prop (optional)
 }
 
 const MatchDetailView: React.FC<MatchDetailViewProps> = ({ 
@@ -27,7 +34,8 @@ const MatchDetailView: React.FC<MatchDetailViewProps> = ({
   bet_form,
   isAuthenticated,
   csrfToken,
-  action_url
+  action_url,
+  messages = [] // Default to empty array
 }) => {
   const {
     competition,
@@ -50,6 +58,24 @@ const MatchDetailView: React.FC<MatchDetailViewProps> = ({
 
   return (
     <div className="container mx-auto p-4 min-h-screen">
+      {/* Display Django Messages */}
+      {messages && messages.length > 0 && (
+        <div className="mb-6 space-y-4">
+          {messages.map((msg, index) => (
+            <Alert 
+              key={index} 
+              variant={msg.level === 'error' || msg.level === 'warning' ? 'destructive' : 'default'}
+            >
+              <Terminal className="h-4 w-4" /> {/* Example Icon */}
+              <AlertTitle>
+                {msg.level.charAt(0).toUpperCase() + msg.level.slice(1)} {/* Capitalize level for title */}
+              </AlertTitle>
+              <AlertDescription>{msg.text}</AlertDescription>
+            </Alert>
+          ))}
+        </div>
+      )}
+
       {/* Competition Section */}
       <Card className={cn("mb-8 text-center", "shadow-xl")}>
         <CardHeader>
