@@ -10,9 +10,12 @@ from .controllers.auth_controller import AuthController # Import the controller
 from .controllers.match_controller import MatchController # Import the MatchController
 from .controllers.competition_controller import CompetitionController # Import the CompetitionController
 from .controllers.team_controller import TeamController # Import the TeamController
+from .controllers.utils.home_data_helper import HomeDataHelper # Import HomeDataHelper
 
 def home(request):
-    return Response(request, "Home", {})
+    helper = HomeDataHelper(request)
+    props = helper.get_home_page_data()
+    return Response(request, "HomeView", props) # Changed "Home" to "HomeView" to match typical naming
 
 def login_view(request):
     auth_controller = AuthController()

@@ -18,7 +18,7 @@ import TeamDetailView from "./views/TeamDetail";
 const config = new DjangoBridge.Config();
 
 // Add your views here
-config.addView("Home", HomeView);
+config.addView("HomeView", HomeView);
 config.addView("LoginView", LoginView);
 config.addView("RegisterView", RegisterView);
 config.addView("MatchDetailView", MatchDetailView);

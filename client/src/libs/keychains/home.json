@@ -1,0 +1,16 @@
+{
+  "leaderboard_title": "Overall Leaderboard",
+  "leaderboard_rank_header": "Rank",
+  "leaderboard_player_header": "Player",
+  "leaderboard_points_header": "Score",
+  "no_leaderboard_data": "Leaderboard is currently empty.",
+  "upcoming_matches_title": "Upcoming Matches",
+  "no_upcoming_matches": "No matches starting soon.",
+  "featured_teams_title": "Discover Teams",
+  "no_featured_teams": "No teams to display at the moment.",
+  "featured_competitions_title": "Active Competitions",
+  "no_featured_competitions": "No competitions to display at the moment.",
+  "view_team_button": "View Team",
+  "view_competition_button": "View Competition",
+  "view_match_button": "View Match Details"
+} 

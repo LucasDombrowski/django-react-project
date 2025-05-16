@@ -14,26 +14,49 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { LeaderboardEntryType } from '@/libs/types/models/matchData'; // Ensure this path is correct
-import matchDetailStrings from '@/libs/keychains/matchDetail.json';
 import { cn } from '@/libs/utils';
 
-interface MatchLeaderboardProps {
-  leaderboardData: LeaderboardEntryType[];
-  currentUserId?: number | null; // Add currentUserId prop (optional)
+// Renamed and made more generic
+export interface GenericLeaderboardEntry {
+  user: {
+    id: number;
+    username: string;
+  };
+  score: number; // Generic score field
+  // total_gained_points is now just 'score'
 }
 
-const MatchLeaderboard: React.FC<MatchLeaderboardProps> = ({ leaderboardData, currentUserId }) => {
+interface LeaderboardStrings {
+    title: string;
+    rank_header: string;
+    player_header: string;
+    points_header: string;
+    no_data: string;
+}
+
+interface GenericLeaderboardProps {
+  leaderboardData: GenericLeaderboardEntry[];
+  currentUserId?: number | null;
+  strings: LeaderboardStrings;
+  pointsSuffix?: string; // e.g., "pts" or "points"
+}
+
+const GenericLeaderboard: React.FC<GenericLeaderboardProps> = ({ 
+    leaderboardData, 
+    currentUserId, 
+    strings, 
+    pointsSuffix = "pts" 
+}) => {
   if (!leaderboardData || leaderboardData.length === 0) {
     return (
       <Card className={cn("shadow-lg", "mt-8")}>
         <CardHeader>
           <CardTitle className="text-xl font-semibold text-foreground">
-            {matchDetailStrings.leaderboard_title}
+            {strings.title}
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground">{matchDetailStrings.leaderboard_no_data}</p>
+          <p className="text-muted-foreground">{strings.no_data}</p>
         </CardContent>
       </Card>
     );
@@ -43,16 +66,16 @@ const MatchLeaderboard: React.FC<MatchLeaderboardProps> = ({ leaderboardData, cu
     <Card className={cn("shadow-lg", "mt-8")}>
       <CardHeader>
         <CardTitle className="text-2xl font-bold text-center text-foreground">
-          {matchDetailStrings.leaderboard_title}
+          {strings.title}
         </CardTitle>
       </CardHeader>
       <CardContent>
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[10%]">{matchDetailStrings.leaderboard_rank_header}</TableHead>
-              <TableHead>{matchDetailStrings.leaderboard_player_header}</TableHead>
-              <TableHead className="text-right">{matchDetailStrings.leaderboard_points_header}</TableHead>
+              <TableHead className="w-[10%]">{strings.rank_header}</TableHead>
+              <TableHead>{strings.player_header}</TableHead>
+              <TableHead className="text-right">{strings.points_header}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -61,16 +84,16 @@ const MatchLeaderboard: React.FC<MatchLeaderboardProps> = ({ leaderboardData, cu
               return (
                 <TableRow 
                   key={entry.user.id}
-                  className={cn(isCurrentUser ? 'bg-primary/10' : '')} // Apply conditional styling
+                  className={cn(isCurrentUser ? 'bg-primary/10' : '')}
                 >
                   <TableCell className={cn("font-semibold", isCurrentUser ? 'text-primary' : '')}>{index + 1}</TableCell>
                   <TableCell className={cn(isCurrentUser ? 'font-bold text-primary' : '')}>{entry.user.username}</TableCell>
                   <TableCell className="text-right">
                     <Badge 
-                      variant={isCurrentUser ? "outline" : (entry.total_gained_points > 0 ? "default" : "secondary")}
+                      variant={isCurrentUser ? "outline" : (entry.score > 0 ? "default" : "secondary")}
                       className={cn("text-md", isCurrentUser ? 'border-primary text-primary' : '')}
                     >
-                      {entry.total_gained_points} pts
+                      {entry.score} {pointsSuffix}
                     </Badge>
                   </TableCell>
                 </TableRow>
@@ -83,4 +106,4 @@ const MatchLeaderboard: React.FC<MatchLeaderboardProps> = ({ leaderboardData, cu
   );
 };
 
-export default MatchLeaderboard; 
+export default GenericLeaderboard; 

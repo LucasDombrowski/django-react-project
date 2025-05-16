@@ -16,7 +16,7 @@ import UserBetDisplay from '@/components/match/UserBetDisplay'; // Import the ne
 // Import newly separated types
 import { DjangoMessage } from '@/libs/types/messages';
 import { UserBetDetailsType } from '@/libs/types/bets';
-import MatchLeaderboard from '@/components/match/MatchLeaderboard'; // Import Leaderboard
+import GenericLeaderboard from '@/components/match/MatchLeaderboard'; // Renamed import
 // Note: Competition, Team, Player, Prediction are implicitly used through MatchData
 
 // Local definitions of DjangoMessage, SerializedPredictionAnswer, UserBetDetailsType are removed.
@@ -165,9 +165,20 @@ const MatchDetailView: React.FC<MatchDetailViewProps> = ({
 
       {/* Conditionally render Leaderboard */}
       {points_calculation_done && leaderboard && leaderboard.length > 0 && (
-        <MatchLeaderboard 
-          leaderboardData={leaderboard} 
+        <GenericLeaderboard 
+          leaderboardData={leaderboard.map(entry => ({ // Adapt data shape
+            user: entry.user,
+            score: entry.total_gained_points 
+          }))}
           currentUserId={current_user_id}
+          strings={{
+            title: matchDetailStrings.leaderboard_title,
+            rank_header: matchDetailStrings.leaderboard_rank_header,
+            player_header: matchDetailStrings.leaderboard_player_header,
+            points_header: matchDetailStrings.leaderboard_points_header,
+            no_data: matchDetailStrings.leaderboard_no_data,
+          }}
+          pointsSuffix="pts"
         />
       )}
     </div>
