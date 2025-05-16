@@ -130,6 +130,7 @@ class Prediction(models.Model):
 class Bet(models.Model):
     match = models.ForeignKey(Match, on_delete=models.CASCADE, related_name='bets')
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='bets')
+    winner_team = models.ForeignKey(Team, on_delete=models.CASCADE, related_name='winner_bets', blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     # updated_at = models.DateTimeField(auto_now=True)
 

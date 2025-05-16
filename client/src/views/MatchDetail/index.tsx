@@ -7,15 +7,28 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"; //
 import { Badge } from "@/components/ui/badge"; // Import Badge for status
 import { cn } from '@/libs/utils'; // Import cn utility
 import matchDetailStrings from '@/libs/keychains/matchDetail.json'; // Import keychain
+import StyledBetFormRenderer from '@/components/forms/StyledBetFormRenderer'; // Import the new form renderer
+import { Button } from '@/components/ui/button'; // Import Button for login/submit
+import { DjangoProvidedForm } from '@/libs/types/forms'; // Updated import path
 // Note: Competition, Team, Player, Prediction are implicitly used through MatchData
 
 // Removed import { MatchDetailViewProps } from '../../libs/types/matchDetailViewProps';
 
 export interface MatchDetailViewProps {
   match: MatchData;
+  bet_form: DjangoProvidedForm; // Add bet_form
+  isAuthenticated: boolean; // Add isAuthenticated
+  csrfToken: string; // Add csrfToken
+  action_url: string; // Add action_url
 }
 
-const MatchDetailView: React.FC<MatchDetailViewProps> = ({ match }) => {
+const MatchDetailView: React.FC<MatchDetailViewProps> = ({ 
+  match,
+  bet_form,
+  isAuthenticated,
+  csrfToken,
+  action_url
+}) => {
   const {
     competition,
     team_one,
@@ -78,6 +91,33 @@ const MatchDetailView: React.FC<MatchDetailViewProps> = ({ match }) => {
 
             <TeamDisplay team={team_two} />
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Bet Form Section */}
+      <Card className={cn("shadow-xl")}>
+        <CardHeader>
+          <CardTitle className="text-2xl font-semibold text-foreground">{matchDetailStrings.bet_form_title}</CardTitle>
+          <CardDescription className="text-muted-foreground">{matchDetailStrings.bet_form_description}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {!isAuthenticated && (
+            <div className="text-center mb-4 p-4 border border-border rounded-md bg-card">
+              <p className="text-muted-foreground mb-3">{matchDetailStrings.login_to_bet_prompt}</p>
+              <Button asChild>
+                <a href="/login/">{matchDetailStrings.login_button_text}</a>
+              </Button>
+            </div>
+          )}
+          <form method="POST" action={action_url}>
+            <input type="hidden" name="csrfmiddlewaretoken" value={csrfToken} />
+            <StyledBetFormRenderer form={bet_form} isDisabled={!isAuthenticated} />
+            {isAuthenticated && (
+              <Button type="submit" className="w-full mt-6" disabled={!isAuthenticated}>
+                {matchDetailStrings.submit_bet_button_text}
+              </Button>
+            )}
+          </form>
         </CardContent>
       </Card>      
     </div>

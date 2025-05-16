@@ -3,5 +3,10 @@
   "vs_text": "VS",
   "status_prefix": "Status: ",
   "status_finished": "Finished",
-  "status_upcoming": "Upcoming / In Progress"
+  "status_upcoming": "Upcoming / In Progress",
+  "bet_form_title": "Place Your Bet",
+  "bet_form_description": "Select your predictions for this match.",
+  "login_to_bet_prompt": "You need to be logged in to place a bet.",
+  "login_button_text": "Login to Bet",
+  "submit_bet_button_text": "Submit Bet"
 } 

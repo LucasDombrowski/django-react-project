@@ -4,11 +4,12 @@ import StyledDjangoFormRenderer from '@/components/forms/StyledDjangoFormRendere
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card'; // Import ShadCN Card
 import { Button } from '@/components/ui/button'; // Import ShadCN Button
 import { cn } from '@/libs/utils'; // Import cn utility
+import { DjangoProvidedForm } from '@/libs/types/forms'; // Import from new location
 
 // This interface can be shared or defined per view if props differ significantly
-export interface DjangoProvidedForm {
-  render: () => React.ReactNode;
-}
+// export interface DjangoProvidedForm {
+//   render: () => React.ReactNode;
+// }
 
 interface AuthFormLayoutProps {
   headingText: string;
