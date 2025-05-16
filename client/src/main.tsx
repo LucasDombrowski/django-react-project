@@ -14,7 +14,7 @@ import LoginView from "./views/Login";
 import RegisterView from "./views/Register";
 import MatchDetailView from "./views/MatchDetail";
 import CompetitionDetailView from "./views/CompetitionDetail";
-
+import TeamDetailView from "./views/TeamDetail";
 const config = new DjangoBridge.Config();
 
 // Add your views here
@@ -23,6 +23,7 @@ config.addView("LoginView", LoginView);
 config.addView("RegisterView", RegisterView);
 config.addView("MatchDetailView", MatchDetailView);
 config.addView("CompetitionDetailView", CompetitionDetailView);
+config.addView("TeamDetailView", TeamDetailView);
 
 // Add your context providers here
 config.addContextProvider("csrf_token", CSRFTokenContext);

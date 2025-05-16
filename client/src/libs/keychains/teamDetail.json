@@ -1,0 +1,9 @@
+{
+  "team_logo_alt": " logo",
+  "players_header": "Players",
+  "no_players_message": "This team currently has no players listed.",
+  "matches_header": "Team Matches",
+  "no_matches_message": "No matches found for this team.",
+  "player_photo_alt_prefix": "Photo of ",
+  "role_prefix": "Role: "
+} 

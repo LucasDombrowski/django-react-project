@@ -9,6 +9,7 @@ from django_bridge.response import Response
 from .controllers.auth_controller import AuthController # Import the controller
 from .controllers.match_controller import MatchController # Import the MatchController
 from .controllers.competition_controller import CompetitionController # Import the CompetitionController
+from .controllers.team_controller import TeamController # Import the TeamController
 
 def home(request):
     return Response(request, "Home", {})
@@ -38,3 +39,7 @@ def competition_detail_view(request, competition_id):
     controller = CompetitionController()
     # This page is likely to be GET only for now, unless we add forms later
     return controller.render_competition_detail_page(request, competition_id)
+
+def team_detail_view(request, team_id):
+    controller = TeamController()
+    return controller.render_team_detail_page(request, team_id)
