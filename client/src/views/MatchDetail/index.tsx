@@ -18,6 +18,8 @@ import { DjangoMessage } from '@/libs/types/messages';
 import { UserBetDetailsType } from '@/libs/types/bets';
 import GenericLeaderboard from '@/components/match/MatchLeaderboard'; // Renamed import
 // Note: Competition, Team, Player, Prediction are implicitly used through MatchData
+import Layout from '@/components/layout/Layout'; // Import Layout
+import { CurrentUser } from '@/libs/types/currentUser'; // Import CurrentUser
 
 // Local definitions of DjangoMessage, SerializedPredictionAnswer, UserBetDetailsType are removed.
 
@@ -25,7 +27,8 @@ export interface MatchDetailViewProps {
   match: MatchData;
   bet_form: DjangoProvidedForm | null; // Can be null if user already bet
   isAuthenticated: boolean; // Add isAuthenticated
-  current_user_id?: number | null; // Added current_user_id (optional)
+  currentUser: CurrentUser | null; // Changed from current_user_id for Layout
+  current_user_id?: number | null; // Kept for GenericLeaderboard, can be derived from currentUser if needed
   csrfToken: string; // Add csrfToken
   action_url: string; // Add action_url
   messages?: DjangoMessage[]; // Add messages prop (optional)
@@ -36,7 +39,8 @@ const MatchDetailView: React.FC<MatchDetailViewProps> = ({
   match,
   bet_form,
   isAuthenticated,
-  current_user_id = null,
+  currentUser, // Use currentUser for Layout
+  current_user_id, // Keep for leaderboard if it specifically needs only the ID
   csrfToken,
   action_url,
   messages = [],
@@ -54,6 +58,8 @@ const MatchDetailView: React.FC<MatchDetailViewProps> = ({
     start_datetime,
   } = match;
 
+  const derivedCurrentUserId = currentUser ? currentUser.id : current_user_id;
+
   // Format date for display (optional, can be more sophisticated)
   const matchDate = new Date(start_datetime).toLocaleDateString(undefined, {
     year: 'numeric',
@@ -64,7 +70,7 @@ const MatchDetailView: React.FC<MatchDetailViewProps> = ({
   });
 
   return (
-    <div className="container mx-auto p-4 min-h-screen">
+    <Layout isAuthenticated={isAuthenticated} currentUser={currentUser}>
       {/* Display Django Messages */}
       {messages && messages.length > 0 && (
         <div className="mb-6 space-y-4">
@@ -170,7 +176,7 @@ const MatchDetailView: React.FC<MatchDetailViewProps> = ({
             user: entry.user,
             score: entry.total_gained_points 
           }))}
-          currentUserId={current_user_id}
+          currentUserId={derivedCurrentUserId} // Use derived ID
           strings={{
             title: matchDetailStrings.leaderboard_title,
             rank_header: matchDetailStrings.leaderboard_rank_header,
@@ -181,7 +187,7 @@ const MatchDetailView: React.FC<MatchDetailViewProps> = ({
           pointsSuffix="pts"
         />
       )}
-    </div>
+    </Layout>
   );
 };
 

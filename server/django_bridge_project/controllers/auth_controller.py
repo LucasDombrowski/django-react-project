@@ -8,12 +8,27 @@ from django_bridge.response import Response
 from ..forms import LoginForm, RegistrationForm # Use relative import for forms
 
 class AuthController(View):
+    def _get_common_props(self, request):
+        current_user_data = None
+        if request.user.is_authenticated:
+            current_user_data = {
+                "id": request.user.id,
+                "username": request.user.username,
+                "score": getattr(request.user, 'score', 0) # Safely access score
+            }
+        return {
+            "isAuthenticated": request.user.is_authenticated,
+            "currentUser": current_user_data,
+        }
+
     def display_login_form(self, request, *args, **kwargs):
         form = LoginForm(request)
-        return Response(request, "LoginView", {
+        props = {
             'form': form,
-            'action_url': reverse('login') 
-        })
+            'action_url': reverse('login'),
+            **self._get_common_props(request)
+        }
+        return Response(request, "LoginView", props)
 
     def handle_login_submission(self, request, *args, **kwargs):
         form = LoginForm(request, data=request.POST)
@@ -22,31 +37,35 @@ class AuthController(View):
             login(request, user)
             return redirect(reverse('home')) 
         
-        # If form is invalid, re-render the LoginView with the form containing errors
-        return Response(request, "LoginView", {
+        props = {
             'form': form,
-            'action_url': reverse('login')
-        }) 
+            'action_url': reverse('login'),
+            **self._get_common_props(request)
+        }
+        return Response(request, "LoginView", props) 
 
     # Registration methods will be added in the next step 
 
     # --- Registration Methods --- 
     def display_registration_form(self, request, *args, **kwargs):
         form = RegistrationForm()
-        return Response(request, "RegisterView", { # Assuming React component will be RegisterView
+        props = { 
             'form': form,
-            'action_url': reverse('register') # Assuming URL name will be 'register'
-        })
+            'action_url': reverse('register'),
+            **self._get_common_props(request)
+        }
+        return Response(request, "RegisterView", props)
 
     def handle_registration_submission(self, request, *args, **kwargs):
-        form = RegistrationForm(request.POST) # Pass request.POST data
+        form = RegistrationForm(request.POST) 
         if form.is_valid():
-            user = form.save() # UserCreationForm's save method creates the user
-            login(request, user) # Log the user in directly after registration
-            return redirect(reverse('home')) # Redirect to home or a welcome page
+            user = form.save() 
+            login(request, user) 
+            return redirect(reverse('home')) 
         
-        # If form is invalid, re-render the RegisterView with the form containing errors
-        return Response(request, "RegisterView", {
+        props = {
             'form': form,
-            'action_url': reverse('register')
-        }) 
+            'action_url': reverse('register'),
+            **self._get_common_props(request)
+        }
+        return Response(request, "RegisterView", props) 

@@ -71,10 +71,20 @@ class HomeDataHelper:
 
     def get_home_page_data(self):
         current_user_id = self.request.user.id if self.request.user.is_authenticated else None
+        current_user_data = None
+        if self.request.user.is_authenticated:
+            current_user_data = {
+                "id": self.request.user.id,
+                "username": self.request.user.username,
+                "score": self.request.user.score # Assuming CustomUser has a score field
+            }
+
         return {
             "leaderboard": self._get_general_leaderboard_data(),
             "upcoming_matches": self._get_upcoming_matches_data(),
             "featured_teams": self._get_featured_teams_data(),
             "featured_competitions": self._get_featured_competitions_data(),
-            "current_user_id": current_user_id,
+            "current_user_id": current_user_id, # Kept for existing GenericLeaderboard logic if needed, but ideally use currentUser directly
+            "isAuthenticated": self.request.user.is_authenticated,
+            "currentUser": current_user_data,
         } 

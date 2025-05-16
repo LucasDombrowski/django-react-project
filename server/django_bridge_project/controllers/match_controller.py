@@ -52,10 +52,19 @@ class MatchController(View):
                     'level': message.level_tag, # e.g., 'debug', 'info', 'success', 'warning', 'error'
                 })
 
+            current_user_data = None
+            if request.user.is_authenticated:
+                current_user_data = {
+                    "id": request.user.id,
+                    "username": request.user.username,
+                    "score": getattr(request.user, 'score', 0) # Safely access score
+                }
+
             props = {
                 "match": match_data,
                 "bet_form": final_bet_form, 
                 "isAuthenticated": request.user.is_authenticated,
+                "currentUser": current_user_data,
                 "current_user_id": request.user.id if request.user.is_authenticated else None,
                 "csrfToken": get_token(request),
                 "action_url": reverse('match_detail', kwargs={'match_id': match_id}),

@@ -17,10 +17,18 @@ class TeamController:
         helper = TeamDataHelper(request, team_instance)
         serialized_team_data = helper.get_team_data()
 
+        current_user_data = None
+        if request.user.is_authenticated:
+            current_user_data = {
+                "id": request.user.id,
+                "username": request.user.username,
+                "score": getattr(request.user, 'score', 0) # Safely access score
+            }
+
         props = {
             "team": serialized_team_data,
-            # "isAuthenticated": request.user.is_authenticated, # If needed later
-            # "csrfToken": get_token(request), # If needed later, requires import
+            "isAuthenticated": request.user.is_authenticated,
+            "currentUser": current_user_data,
         }
         
         return Response(request, "TeamDetailView", props) 

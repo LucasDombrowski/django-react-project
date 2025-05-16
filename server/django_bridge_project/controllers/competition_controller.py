@@ -21,11 +21,18 @@ class CompetitionController:
         helper = CompetitionDataHelper(request, competition_instance)
         serialized_competition_data = helper.get_competition_data()
 
+        current_user_data = None
+        if request.user.is_authenticated:
+            current_user_data = {
+                "id": request.user.id,
+                "username": request.user.username,
+                "score": getattr(request.user, 'score', 0) # Safely access score
+            }
+
         props = {
             "competition": serialized_competition_data,
-            # We can add other necessary props like csrfToken if forms are involved later
-            # "isAuthenticated": request.user.is_authenticated,
-            # "csrfToken": get_token(request), # Needs from django.middleware.csrf import get_token
+            "isAuthenticated": request.user.is_authenticated,
+            "currentUser": current_user_data,
         }
         
         return Response(request, "CompetitionDetailView", props) 
